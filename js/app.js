@@ -416,6 +416,7 @@ function pageNotFound() {
 // 「你想看什么」：单独一页，首页顶部有入口
 function pageAsk() {
   app.innerHTML = `
+    <a class="back" href="#/">← 回首页</a>
     <div class="page-head"><h1>你想看什么？</h1><p>想学哪个学科、对哪件事好奇、哪篇没看懂，都告诉我们。下一集写什么，你说了算。</p></div>
     <div class="narrow-form fb-form"><textarea id="fb-msg" maxlength="2000" placeholder="比如：想看心理学里怎么跟人沟通；想要 A-Level 物理的预习；想知道某件事背后的道理……"></textarea>
       <input id="fb-contact" maxlength="200" placeholder="留个联系方式（可以不填）">
@@ -431,7 +432,11 @@ function bindFeedback(articleId) {
     const msg = document.getElementById('fb-msg'), note = document.getElementById('fb-note');
     if (!msg.value.trim()) { note.textContent = '先写点什么吧。'; return; }
     btn.disabled = true;
-    try { await Cloud.feedback(articleId, msg.value.trim(), document.getElementById('fb-contact').value.trim()); msg.value = ''; note.textContent = '收到了，谢谢！'; }
+    try {
+      await Cloud.feedback(articleId, msg.value.trim(), document.getElementById('fb-contact').value.trim());
+      msg.value = '';
+      note.innerHTML = articleId === 'topic-request' ? '收到了，谢谢！<a href="#/" style="color:var(--accent)">回首页 →</a>' : '收到了，谢谢！';
+    }
     catch (e) { note.textContent = e.message; }
     btn.disabled = false;
   };

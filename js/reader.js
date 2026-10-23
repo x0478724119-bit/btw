@@ -158,6 +158,12 @@ const Reader = (() => {
           <h1 class="en">${esc(a.en)}</h1>
           <p class="r-zh-title">${esc(a.title)}</p>
           ${modeSeg}
+          ${(() => {
+            // 简单英文版和完整版互相链接
+            if (body.easyOf && ARTICLES[body.easyOf]) return `<p class="r-easy">这是简单英文版：句子更短、词更常用。<a href="#/read/${body.easyOf}">读完整版 →</a></p>`;
+            const easy = Object.keys(ARTICLES).find(k => ARTICLES[k].body && ARTICLES[k].body.easyOf === id);
+            return easy ? `<p class="r-easy">英文读着吃力？<a href="#/read/${easy}">读简单英文版 →</a></p>` : '';
+          })()}
           ${a.body ? '' : '<p class="r-note">（示例正文，这一篇的真实内容还没写）</p>'}
           ${st.hintSeen2 ? '' : `<div class="r-hint" id="r-hint"><div>${(() => {
             const touch = matchMedia('(hover: none)').matches;

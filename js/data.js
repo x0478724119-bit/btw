@@ -320,6 +320,11 @@ const SERIES = [
 
 // ---------- 单篇 ----------
 const SINGLES = [
+  // 简单英文版（正文里写 easyOf: 原文 id，阅读页会互相链接）
+  ['math-bayes-easy', 'math', 1, '查出阳性，你真的得病了吗？（简单英文版）', 'A Positive Test: Are You Really Sick? (Easy English)', '', 600],
+  ['phys-moon-easy', 'physics', 1, '月亮其实一直在往下掉（简单英文版）', 'The Moon Is Falling (Easy English)', '', 600],
+  ['gt-dominance-easy', 'business', 2, '为什么聪明人会集体做蠢事（简单英文版）', 'Why Smart People Make Bad Choices Together (Easy English)', '', 600],
+  ['life-midgley-easy', 'people', 2, '一个人，两项「安全」的发明（简单英文版）', 'One Man, Two “Safe” Inventions (Easy English)', '', 600],
   ['procrastination', 'psychology', 3, '为什么你总是拖到最后一天？', 'Why Do You Always Wait Until the Last Day?', '', 600],
   ['sleep-memory', 'biology', 3, '熬夜以后，背的单词为什么记不住？', 'Why Words Don’t Stick After an All-Nighter', '', 600],
   ['titanic', 'history', 3, '泰坦尼克号的救生艇为什么只够一半的人？', 'Why the Titanic Had Lifeboats for Only Half', '', 600],
