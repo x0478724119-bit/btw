@@ -284,6 +284,19 @@ const SERIES = [
     ],
   },
   {
+    id: 'nature', theme: 'biology', level: 3,
+    title: '好看的生物，为什么长这样', en: 'Beautiful Creatures, Explained',
+    desc: '读者点名想看的漂亮生物：每集一种，讲清楚它为什么长成这样，哪些说法有实验证明、哪些还只是猜测。',
+    episodes: [
+      ['nature-dragontail', '燕凤蝶：翅膀开窗、尾巴当诱饵', 'The Dragontail Butterfly'],
+      ['nature-morpho', '没有蓝色色素的蓝蝴蝶', 'The Morpho’s Impossible Blue'],
+      ['nature-peacock', '孔雀的尾巴差点逼疯达尔文', 'The Peacock’s Tail'],
+      ['nature-octopus', '色盲的章鱼，怎么变出颜色', 'The Colour-Blind Master of Camouflage'],
+      ['nature-flamingo', '火烈鸟是吃成粉色的', 'Why Flamingos Are Pink'],
+      ['nature-mantis', '长得像兰花的螳螂', 'The Orchid Mantis'],
+    ],
+  },
+  {
     id: 'mind', theme: 'psychology', level: 2,
     title: '为什么人会做傻决定', en: 'Why We Make Bad Decisions',
     desc: '锚定效应、损失厌恶、从众心理。看懂自己，也看懂商家是怎么让你掏钱的。',
