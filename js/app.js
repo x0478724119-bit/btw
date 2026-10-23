@@ -90,8 +90,8 @@ function filterBar(show = 'both') {
   const levels = Object.entries(LEVELS).filter(([k]) => pool.some(x => x.level === Number(k)));
   const lens = LENS.filter(([v]) => v === 'all' || pool.some(x => lenOk(x.minutes, v)));
   // 第一行：现在看的是「全部 / 连续剧 / 单篇」，一眼就知道自己在哪
-  const scope = [['both', '#/', '全部'], ['series', '#/series', '连续剧'], ['singles', '#/singles', '单篇']]
-    .map(([k, href, n]) => `<a class="chip scope ${show === k ? 'on' : ''}" href="${href}">${n}</a>`).join('');
+  const scope = [['both', '全部'], ['series', '连续剧'], ['singles', '单篇']]
+    .map(([k, n]) => `<button class="chip scope ${show === k ? 'on' : ''}" data-scope="${k}">${n}</button>`).join('');
   return `
     <div class="filters">
       <div class="chips scroll scope-row"><span class="f-label">看</span>${scope}</div>
@@ -120,6 +120,17 @@ function mountBrowse(show, extra = '') {
   const draw = () => { box.innerHTML = filterBar(show) + extra + browseHTML(show); };
   draw();
   box.onclick = e => {
+    // 「看：全部 / 连续剧 / 单篇」就在当前页切换，不跳页面、不回到顶部
+    const sc = e.target.closest('[data-scope]');
+    if (sc) {
+      show = sc.dataset.scope;
+      const h = document.querySelector('.page-head h1');
+      if (h) h.textContent = { both: '全部', series: '连续剧', singles: '单篇' }[show];
+      const p = document.querySelector('.page-head p');
+      if (p) p.textContent = { both: '连续剧和单篇都在这里。', series: '一个大主题，一集一集讲下去。每一集看完都能学会一个东西，连起来是一条完整的路。', singles: '零散的一篇篇文章，看到感兴趣的标题就点进去。' }[show];
+      draw();
+      return;
+    }
     const b = e.target.closest('[data-f]');
     if (!b) return;
     filter[b.dataset.f] = b.dataset.f === 'level' ? Number(b.dataset.v) : b.dataset.v;
@@ -221,8 +232,8 @@ function pageLogin() {
   const m = authMode;
   const title = { in: '登录 BTW', up: '注册 BTW', forgot: '找回密码' }[m];
   const intro = {
-    in: '登录后，换手机、换电脑都能接着读。',
-    up: '只需要邮箱，QQ 邮箱、163 邮箱都可以。注册后，你在这台设备上的进度、收藏和生词都会一起带过去。',
+    in: '登录后，换手机、换电脑都能接着读。不登录也能读所有文章。',
+    up: '只需要邮箱，QQ 邮箱、163 邮箱都可以。注册后，你在这台设备上的进度、收藏和生词都会一起带过去。不注册也能读所有文章，注册只是为了换设备也能接着读。',
     forgot: '输入注册时用的邮箱，我们给你发一封重设密码的邮件。',
   }[m];
   app.innerHTML = `
