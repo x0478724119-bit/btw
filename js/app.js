@@ -491,6 +491,23 @@ function syncNav() {
 }
 Cloud.onChange(syncNav);
 
+// 右上角 ☾ / ☀：全站深色和浅色切换（记住选择；没选过就跟随系统）
+function applyTheme() {
+  let t = Store.get().settings.theme || 'auto';
+  if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+  const b = document.getElementById('theme-btn');
+  if (b) { b.textContent = t === 'dark' ? '☀' : '☾'; b.title = t === 'dark' ? '切换到浅色' : '切换到深色'; }
+}
+document.getElementById('theme-btn').onclick = () => {
+  const now = document.documentElement.dataset.theme;
+  Store.setSetting('theme', now === 'dark' ? 'light' : 'dark');
+  applyTheme();
+  if (location.hash.startsWith('#/read/')) route();   // 阅读页的背景跟着变
+};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+applyTheme();
+
 // ---------- 路由 ----------
 function route() {
   Reader.unmount();

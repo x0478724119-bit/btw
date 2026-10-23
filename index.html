@@ -6,7 +6,16 @@
   <title>BTW · Pick up English by the way</title>
   <meta name="description" content="用英文学经济、历史、心理、新闻……一篇读完就学会一个东西。">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%231D1D1B%22/%3E%3Ctext x=%2232%22 y=%2244%22 font-family=%22Georgia,serif%22 font-size=%2234%22 font-weight=%22700%22 fill=%22%23F4F2EE%22 text-anchor=%22middle%22%3EB%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css?v=58">
+  <script>
+    // 深色 / 浅色：在页面画出来之前就定好，避免先白一下再变黑
+    (function () {
+      var t = 'auto';
+      try { t = (JSON.parse(localStorage.getItem('btw-v1')) || {}).settings.theme || 'auto'; } catch (e) {}
+      if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="stylesheet" href="css/style.css?v=60">
 </head>
 <body>
   <header class="topnav" id="topnav">
@@ -17,6 +26,7 @@
       <a href="#/singles" data-nav="singles">单篇</a>
       <a href="#/me" data-nav="me">我的</a>
     </nav>
+    <button class="theme-btn" id="theme-btn" title="切换深色 / 浅色">☾</button>
     <a class="nav-login" href="#/login" id="nav-login">登录</a>
   </header>
 
@@ -29,40 +39,40 @@
     <a href="#/me" data-nav="me"><span class="bn-ico">○</span>我的</a>
   </nav>
 
-  <script src="js/data.js?v=58"></script>
-  <script src="js/content/luckin-case.js?v=58"></script>
-  <script src="js/content/procrastination.js?v=58"></script>
-  <script src="js/content/sleep-memory.js?v=58"></script>
-  <script src="js/content/titanic.js?v=58"></script>
-  <script src="js/content/miranda.js?v=58"></script>
-  <script src="js/content/milk-tea.js?v=58"></script>
-  <script src="js/content/aud-cny.js?v=58"></script>
-  <script src="js/content/queues.js?v=58"></script>
-  <script src="js/content/gt-dominance.js?v=58"></script>
-  <script src="js/content/gt-guess.js?v=58"></script>
-  <script src="js/content/py-basics.js?v=58"></script>
-  <script src="js/content/art-nightwatch.js?v=58"></script>
-  <script src="js/content/geo-climate.js?v=58"></script>
-  <script src="js/content/math-bayes.js?v=58"></script>
-  <script src="js/content/bio-resistance.js?v=58"></script>
-  <script src="js/content/chem-haber.js?v=58"></script>
-  <script src="js/content/phys-moon.js?v=58"></script>
-  <script src="js/content/life-midgley.js?v=58"></script>
-  <script src="js/content/life-patterson.js?v=58"></script>
-  <script src="js/content/py-loops.js?v=58"></script>
-  <script src="js/content/math-sampling.js?v=58"></script>
-  <script src="js/content/psy-prison.js?v=58"></script>
-  <script src="js/content/math-bayes-easy.js?v=58"></script>
-  <script src="js/content/phys-moon-easy.js?v=58"></script>
-  <script src="js/content/gt-dominance-easy.js?v=58"></script>
-  <script src="js/content/life-midgley-easy.js?v=58"></script>
-  <script src="js/content/nature-dragontail.js?v=58"></script>
-  <script src="js/dict.js?v=58"></script>
-  <script src="js/vendor/supabase.js?v=58"></script>
-  <script src="js/config.js?v=58"></script>
-  <script src="js/store.js?v=58"></script>
-  <script src="js/cloud.js?v=58"></script>
-  <script src="js/reader.js?v=58"></script>
-  <script src="js/app.js?v=58"></script>
+  <script src="js/data.js?v=60"></script>
+  <script src="js/content/luckin-case.js?v=60"></script>
+  <script src="js/content/procrastination.js?v=60"></script>
+  <script src="js/content/sleep-memory.js?v=60"></script>
+  <script src="js/content/titanic.js?v=60"></script>
+  <script src="js/content/miranda.js?v=60"></script>
+  <script src="js/content/milk-tea.js?v=60"></script>
+  <script src="js/content/aud-cny.js?v=60"></script>
+  <script src="js/content/queues.js?v=60"></script>
+  <script src="js/content/gt-dominance.js?v=60"></script>
+  <script src="js/content/gt-guess.js?v=60"></script>
+  <script src="js/content/py-basics.js?v=60"></script>
+  <script src="js/content/art-nightwatch.js?v=60"></script>
+  <script src="js/content/geo-climate.js?v=60"></script>
+  <script src="js/content/math-bayes.js?v=60"></script>
+  <script src="js/content/bio-resistance.js?v=60"></script>
+  <script src="js/content/chem-haber.js?v=60"></script>
+  <script src="js/content/phys-moon.js?v=60"></script>
+  <script src="js/content/life-midgley.js?v=60"></script>
+  <script src="js/content/life-patterson.js?v=60"></script>
+  <script src="js/content/py-loops.js?v=60"></script>
+  <script src="js/content/math-sampling.js?v=60"></script>
+  <script src="js/content/psy-prison.js?v=60"></script>
+  <script src="js/content/math-bayes-easy.js?v=60"></script>
+  <script src="js/content/phys-moon-easy.js?v=60"></script>
+  <script src="js/content/gt-dominance-easy.js?v=60"></script>
+  <script src="js/content/life-midgley-easy.js?v=60"></script>
+  <script src="js/content/nature-dragontail.js?v=60"></script>
+  <script src="js/dict.js?v=60"></script>
+  <script src="js/vendor/supabase.js?v=60"></script>
+  <script src="js/config.js?v=60"></script>
+  <script src="js/store.js?v=60"></script>
+  <script src="js/cloud.js?v=60"></script>
+  <script src="js/reader.js?v=60"></script>
+  <script src="js/app.js?v=60"></script>
 </body>
 </html>

@@ -145,7 +145,7 @@ const Reader = (() => {
       `<button data-mode="${v}" class="${mode === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
 
     return `
-      <div class="reader bg-${st.bg} size-${st.size}" id="reader">
+      <div class="reader bg-${document.documentElement.dataset.theme === 'dark' && st.bg === 'white' ? 'night' : st.bg} size-${st.size}" id="reader">
         <div class="r-line" id="r-line"></div>
         <header class="r-top" id="r-top">
           <button class="icon-btn" id="r-back" title="返回">←</button>
