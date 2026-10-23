@@ -138,11 +138,20 @@ function pageHome() {
     <section class="hero">
       <h1 class="en">Pick up English <em>by the way.</em></h1>
       <p>博弈论、Python、艺术史、历史……一个学科一门课，按大学的深度讲，用真实的事讲。英语？读着读着就会了。</p>
+      <p class="hero-how">怎么读：默认是「中文夹英文」，中文句子里的名词换成英文，不认识就点一下看中文；想挑战，可以切到「全英文」。</p>
     </section>
     <div id="hot"></div>
-    <div id="browse"></div>`;
+    <div id="browse"></div>
+    <section class="section ask-topic">
+      <div class="section-head"><h2>你想看什么？</h2></div>
+      <p class="meta" style="margin:-8px 0 14px">想学哪个学科、对哪件事好奇、哪篇没看懂，都告诉我们。下一集写什么，你说了算。</p>
+      <div class="fb-form"><textarea id="fb-msg" maxlength="2000" placeholder="比如：想看心理学里怎么跟人沟通；想要 A-Level 物理的预习……"></textarea>
+      <input id="fb-contact" maxlength="200" placeholder="留个联系方式（可以不填）">
+      <button class="btn btn-ghost" id="fb-send">发送</button><span class="meta" id="fb-note"></span></div>
+    </section>`;
   mountBrowse('both', cont);
   drawHot();
+  bindFeedback('topic-request');
 }
 
 // 首页「热门」：按最近 30 天读的人数挑 3 篇，不显示数字；数据不够时用 HOT_FALLBACK 补齐
@@ -277,7 +286,7 @@ async function pageAdmin() {
   app.innerHTML = '<div class="page-head"><h1>后台</h1><p class="meta">正在读取……</p></div>';
   let d;
   try { d = await Cloud.adminStats(); } catch (e) { pageNotFound(); return; }
-  const titleOf = id => (ARTICLES[id] && ARTICLES[id].title) || id || '（整站）';
+  const titleOf = id => id === 'topic-request' ? '「你想看什么」投稿' : (ARTICLES[id] && ARTICLES[id].title) || id || '（整站）';
   const seriesOf = id => { const a = ARTICLES[id]; const s = a && a.series && SERIES.find(x => x.id === a.series); return s ? s.title : a ? '单篇' : ''; };
   // 按合集汇总
   const bySeries = {};

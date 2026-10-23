@@ -149,7 +149,12 @@ const Reader = (() => {
           <p class="r-zh-title">${esc(a.title)}</p>
           ${modeSeg}
           ${a.body ? '' : '<p class="r-note">（示例正文，这一篇的真实内容还没写）</p>'}
-          ${st.hintSeen ? '' : `<p class="r-hint" id="r-hint">${matchMedia('(hover: none)').matches ? '长按句子看中文，点单词听读音、看意思' : '鼠标停在句子上看中文，点单词听读音、看意思'}<button id="hint-x">知道了</button></p>`}
+          ${st.hintSeen2 ? '' : `<div class="r-hint" id="r-hint"><div>${(() => {
+            const touch = matchMedia('(hover: none)').matches;
+            return mode === 'dg'
+              ? `<b>这是「中文夹英文」的读法</b>：中文句子里的名词换成了英文，读着读着就认识了。不认识的英文词，${touch ? '点一下' : '鼠标停在上面'}就能看中文；每段右边的「EN」能看整段英文原文。想挑战一下？点上面的「全英文」。`
+              : `<b>这是「全英文」的读法</b>：${touch ? '长按' : '鼠标停在'}句子上看中文翻译，点单词听读音、看意思，每段右边的「译」能看整段中文。觉得吃力，可以切回「中文夹英文」。`;
+          })()}</div><button id="hint-x">知道了</button></div>`}
           ${guideHTML(body.guide)}
           ${paras}
           ${body.sayIt ? `
@@ -368,7 +373,7 @@ const Reader = (() => {
         }
         return;
       }
-      if (e.target.id === 'hint-x') { Store.setSetting('hintSeen', true); document.getElementById('r-hint').remove(); return; }
+      if (e.target.id === 'hint-x') { Store.setSetting('hintSeen2', true); document.getElementById('r-hint').remove(); return; }
       const sayBtn = e.target.closest('.say-btn');
       if (sayBtn) { speak(sayBtn.dataset.say); return; }
       const wEl = e.target.closest('.w');
