@@ -44,6 +44,7 @@ function lookup(word) {
 const properNoun = wEl => /^[A-Z]/.test(wEl.textContent) && wEl.closest('.s, .term').querySelector('.w') !== wEl;
 
 const Reader = (() => {
+  let readerFinish = null;   // 当前文章的「读完了」，做完全部 Quick check 时直接调用
   let cleanup = [];
 
   function sentenceHTML(en) {
@@ -370,6 +371,7 @@ const Reader = (() => {
           const el = document.getElementById('qz-score');
           el.textContent = `${score} / ${all.length} 答对`;
           el.classList.remove('hidden');
+          if (readerFinish) readerFinish();
         }
         return;
       }
@@ -461,19 +463,33 @@ const Reader = (() => {
             <div>${esc(next.title)}</div></a>` : ''}
         </div>`;
     };
-    // 两种办法都算：看到文末的标记，或者滚动到了 97% 以后
+    // 到了文末，还要真的读过一会儿才算读完：至少读了全文预计时间的 30%（最少 45 秒，最多要求 3 分钟）。
+    // 只是滑到底看看有多长，不算；以前读完过的、或者把 Quick check 全做完的，直接算
+    const needSec = Math.min(Math.max(45, ARTICLES[id].minutes * 60 * 0.3), 180);
+    const tryFinish = () => {
+      if (finished) return;
+      if (Store.progressOf(id).done || Store.progressOf(id).seconds >= needSec) finish();
+    };
     on(window, 'scroll', () => {
       const max = document.documentElement.scrollHeight - innerHeight;
-      if (max > 0 && scrollY / max > 0.97) finish();
+      if (max > 0 && scrollY / max > 0.97) tryFinish();
     }, { passive: true });
     if (mark && 'IntersectionObserver' in window) {
-      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { finish(); io.disconnect(); } });
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) tryFinish(); });
       io.observe(mark);
       cleanup.push(() => io.disconnect());
     }
+    // 停在文末继续读（比如在做题、看参考答案）的时候，时间够了也算
+    const endTimer = setInterval(() => {
+      const r = mark && mark.getBoundingClientRect();
+      if (r && r.top < innerHeight) tryFinish();
+    }, 5000);
+    cleanup.push(() => clearInterval(endTimer));
+    readerFinish = finish;
   }
 
   function unmount() {
+    readerFinish = null;
     cleanup.forEach(fn => fn());
     cleanup = [];
     document.querySelectorAll('.pop, .tip, .panel').forEach(el => el.remove());
