@@ -320,6 +320,7 @@ body.reading { background: var(--r-bg, #fff); }
 .resume-x { background: none; color: #B9B5AD; padding: 5px 6px !important; }
 .dw { font-family: var(--serif); color: var(--accent); margin: 0 .18em; border-radius: 3px; }
 .dw.hl { background: var(--r-hl); }
+.term-both > .dw { margin: 0 .1em 0 0; }
 .reader.bg-night .dw { color: #8FC1AE; }
 .pop .p-dg { font-size: 13px; color: var(--accent); margin-top: 6px; }
 .r-source { margin-top: 48px; font-size: 12.5px; color: var(--r-muted); line-height: 1.7; }

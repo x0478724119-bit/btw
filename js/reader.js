@@ -77,13 +77,21 @@ const Reader = (() => {
     const walkStr = x => typeof x === 'string' ? [x] : Array.isArray(x) ? x.flatMap(walkStr) : x && typeof x === 'object' ? Object.values(x).flatMap(walkStr) : [];
     walkStr([body.paragraphs, body.quiz, body.questions]).forEach(str => str.replace(TERM_EN, (m, en, zh) => { if (!swapMap[zh]) swapMap[zh] = en; return m; }));
     const swapKeys = Object.keys(swapMap).sort((x, y) => y.length - x.length);
+    // 专有名词（英文里用 [[term|中文]] 标过的）：第一次出现时中英都给，写成「社会认同（social proof）」，之后只显示英文
+    const termZh = new Set();
+    walkStr([body.paragraphs, body.quiz, body.questions]).forEach(str => str.replace(TERM_EN, (m, en, zh) => { termZh.add(zh); return m; }));
+    const seenTerm = new Set();
     // 中文夹英文：把中文里的名词换成英文，鼠标停在英文上看中文
     const dgHTML = zh => {
       const t = zh.replace(/\{[^}]+\}/g, '');
       let out = '', i = 0;
       while (i < t.length) {
         const k = swapKeys.find(key => t.startsWith(key, i));
-        if (k) { out += `<span class="dw" data-zh="${esc(k)}">${sentenceHTML(swapMap[k])}</span>`; i += k.length; }
+        if (k && termZh.has(k) && !seenTerm.has(k)) {
+          seenTerm.add(k);
+          out += `<span class="term-both">${esc(k)}<span class="dw" data-zh="${esc(k)}">（${sentenceHTML(swapMap[k])}）</span></span>`;
+          i += k.length;
+        } else if (k) { out += `<span class="dw" data-zh="${esc(k)}">${sentenceHTML(swapMap[k])}</span>`; i += k.length; }
         else { out += esc(t[i]); i++; }
       }
       return out;
@@ -115,7 +123,8 @@ const Reader = (() => {
     // 代码块：{ code: '代码', out: '运行结果（可选）' }
     const codeBlock = c => `<figure class="r-code"><pre><code>${esc(c.code)}</code></pre>${c.out ? `<pre class="r-out"><code>${esc(c.out)}</code></pre>` : ''}</figure>`;
     // 小标题跟着档位走：中文为主只要中文，全英文只要英文，英文为主是英文 + 一行小字中文
-    const heading = x => mode === 'dg' && !body.cn ? `<h2 class="r-h">${esc(x.zh)}</h2>`
+    // 中文夹英文：小标题中文在上，英文原标题小字在下（专有名词的小标题，一眼就有中英两个名字）
+    const heading = x => mode === 'dg' && !body.cn ? `<h2 class="r-h">${esc(x.zh)}<span class="r-h-zh">${esc(x.h.replace(/^\d+\.\s*/, ''))}</span></h2>`
       : mode === 'en' && !body.cn ? `<h2 class="r-h">${esc(x.h)}</h2>`
       : `<h2 class="r-h">${esc(body.cn ? x.zh : x.h)}<span class="r-h-zh">${esc(body.cn ? x.h : x.zh)}</span></h2>`;
     // 选择题一律用英文（悬停看中文）；中文为主时题目下面加一行小字中文
