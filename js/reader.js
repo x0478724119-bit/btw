@@ -454,7 +454,7 @@ const Reader = (() => {
       document.getElementById('r-summary').innerHTML = `
         <div class="summary">
           <h3>这篇读完了</h3>
-          <div class="stat">这篇你读了 ${fmtMin(Store.progressOf(id).seconds)}</div>
+          <div class="stat">这篇你一共读了 <span id="sum-time">${fmtMin(Store.progressOf(id).seconds)}</span></div>
           ${words.length ? `<ul>${words.map(w => `
             <li><b>${esc(w.w)}</b><span class="zh">${esc(w.zh)}</span><div class="ctx">${esc(w.sentence)}</div></li>`).join('')}</ul>`
             : '<div class="meta">这篇没有收藏生词。</div>'}
@@ -483,6 +483,8 @@ const Reader = (() => {
     const endTimer = setInterval(() => {
       const r = mark && mark.getBoundingClientRect();
       if (r && r.top < innerHeight) tryFinish();
+      const st = document.getElementById('sum-time');
+      if (st) st.textContent = fmtMin(Store.progressOf(id).seconds);
     }, 5000);
     cleanup.push(() => clearInterval(endTimer));
     readerFinish = finish;

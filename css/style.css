@@ -99,6 +99,9 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 8px 24px 96px; }
 .hero h1 { font: 400 44px/1.15 var(--serif); letter-spacing: -0.02em; }
 .hero h1 em { font-style: italic; font-weight: 400; color: var(--accent); white-space: nowrap; }
 .hero p { color: var(--text-2); font-size: 16px; margin: 16px 0 24px; }
+.hero .ask-link { display: inline-block; font-size: 13.5px; color: var(--accent); margin: -8px 0 8px; }
+.narrow-form { max-width: 560px; }
+.chip.scope { text-decoration: none; }
 .hero .hero-how { font-size: 13.5px; color: var(--muted); margin: -12px 0 24px; }
 
 .continue {

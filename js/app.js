@@ -82,15 +82,23 @@ const avgMin = s => Math.round(s.episodes.reduce((n, e) => n + ARTICLES[e].minut
 const seriesOk = s => (filter.theme === 'all' || s.theme === filter.theme) && (!filter.level || s.level === filter.level) && lenOk(avgMin(s), filter.len);
 const singleOk = a => (filter.theme === 'all' || a.theme === filter.theme) && (!filter.level || a.level === filter.level) && lenOk(a.minutes, filter.len);
 
-function filterBar() {
+function filterBar(show = 'both') {
   const chip = (f, v, n) => `<button class="chip ${filter[f] === v ? 'on' : ''}" data-f="${f}" data-v="${v}">${n}</button>`;
   const t = themeOf(filter.theme);
+  // 只显示真的有内容的级别和长度，免得点进去什么都没有
+  const pool = [...SERIES.map(x => ({ level: x.level, minutes: avgMin(x) })), ...singles().map(a => ({ level: a.level, minutes: a.minutes }))];
+  const levels = Object.entries(LEVELS).filter(([k]) => pool.some(x => x.level === Number(k)));
+  const lens = LENS.filter(([v]) => v === 'all' || pool.some(x => lenOk(x.minutes, v)));
+  // 第一行：现在看的是「全部 / 连续剧 / 单篇」，一眼就知道自己在哪
+  const scope = [['both', '#/', '全部'], ['series', '#/series', '连续剧'], ['singles', '#/singles', '单篇']]
+    .map(([k, href, n]) => `<a class="chip scope ${show === k ? 'on' : ''}" href="${href}">${n}</a>`).join('');
   return `
     <div class="filters">
-      <div class="chips scroll">${chip('theme', 'all', '全部')}${THEMES.map(x => chip('theme', x.id, x.name)).join('')}</div>
+      <div class="chips scroll scope-row"><span class="f-label">看</span>${scope}</div>
+      <div class="chips scroll">${chip('theme', 'all', '全部学科')}${THEMES.map(x => chip('theme', x.id, x.name)).join('')}</div>
       <div class="f-sub">
-        <div class="chips scroll"><span class="f-label">级别</span>${chip('level', 0, '全部')}${Object.entries(LEVELS).map(([k, v]) => chip('level', Number(k), v.name)).join('')}</div>
-        <div class="chips scroll"><span class="f-label">长度</span>${LENS.map(([v, n]) => chip('len', v, n)).join('')}</div>
+        ${levels.length > 1 ? `<div class="chips scroll"><span class="f-label">英文难度</span>${chip('level', 0, '全部')}${levels.map(([k, v]) => chip('level', Number(k), v.name)).join('')}</div>` : ''}
+        ${lens.length > 2 ? `<div class="chips scroll"><span class="f-label">长度</span>${lens.map(([v, n]) => chip('len', v, n)).join('')}</div>` : ''}
       </div>
       ${t ? `<p class="theme-desc">${t.desc}</p>` : ''}
     </div>`;
@@ -109,7 +117,7 @@ function browseHTML(show) {
 
 function mountBrowse(show, extra = '') {
   const box = document.getElementById('browse');
-  const draw = () => { box.innerHTML = filterBar() + extra + browseHTML(show); };
+  const draw = () => { box.innerHTML = filterBar(show) + extra + browseHTML(show); };
   draw();
   box.onclick = e => {
     const b = e.target.closest('[data-f]');
@@ -138,20 +146,14 @@ function pageHome() {
     <section class="hero">
       <h1 class="en">Pick up English <em>by the way.</em></h1>
       <p>博弈论、Python、艺术史、历史……一个学科一门课，按大学的深度讲，用真实的事讲。英语？读着读着就会了。</p>
-      <p class="hero-how">怎么读：默认是「中文夹英文」，中文句子里的名词换成英文，不认识就点一下看中文；想挑战，可以切到「全英文」。</p>
+      <p class="hero-how">怎么读：默认是「中文夹英文」，中文句子里的名词换成英文，不认识就点一下看中文；想挑战，可以切到「全英文」。英语基础一般也能读。</p>
+      <a class="ask-link" href="#/ask">想看什么学科、什么话题？告诉我们 →</a>
     </section>
     <div id="hot"></div>
     <div id="browse"></div>
-    <section class="section ask-topic">
-      <div class="section-head"><h2>你想看什么？</h2></div>
-      <p class="meta" style="margin:-8px 0 14px">想学哪个学科、对哪件事好奇、哪篇没看懂，都告诉我们。下一集写什么，你说了算。</p>
-      <div class="fb-form"><textarea id="fb-msg" maxlength="2000" placeholder="比如：想看心理学里怎么跟人沟通；想要 A-Level 物理的预习……"></textarea>
-      <input id="fb-contact" maxlength="200" placeholder="留个联系方式（可以不填）">
-      <button class="btn btn-ghost" id="fb-send">发送</button><span class="meta" id="fb-note"></span></div>
-    </section>`;
+`;
   mountBrowse('both', cont);
   drawHot();
-  bindFeedback('topic-request');
 }
 
 // 首页「热门」：按最近 30 天读的人数挑 3 篇，不显示数字；数据不够时用 HOT_FALLBACK 补齐
@@ -411,6 +413,16 @@ function pageNotFound() {
   app.innerHTML = '<div class="page-head"><h1>找不到这一页</h1><p><a href="#/" style="color:var(--accent)">回首页 →</a></p></div>';
 }
 
+// 「你想看什么」：单独一页，首页顶部有入口
+function pageAsk() {
+  app.innerHTML = `
+    <div class="page-head"><h1>你想看什么？</h1><p>想学哪个学科、对哪件事好奇、哪篇没看懂，都告诉我们。下一集写什么，你说了算。</p></div>
+    <div class="narrow-form fb-form"><textarea id="fb-msg" maxlength="2000" placeholder="比如：想看心理学里怎么跟人沟通；想要 A-Level 物理的预习；想知道某件事背后的道理……"></textarea>
+      <input id="fb-contact" maxlength="200" placeholder="留个联系方式（可以不填）">
+      <button class="btn btn-primary" id="fb-send">发送</button><span class="meta" id="fb-note"></span></div>`;
+  bindFeedback('topic-request');
+}
+
 // 留言框（「我的」页和每篇文章末尾共用）
 function bindFeedback(articleId) {
   const btn = document.getElementById('fb-send');
@@ -455,6 +467,7 @@ function route() {
   else if (page === 'test') { location.replace('#/'); return; }
   else if (page === 'login') pageLogin();
   else if (page === 'reset') pageReset();
+  else if (page === 'ask') pageAsk();
   else if (page === 'admin') pageAdmin();
   else if (page === 'me') pageMe();
   else if (!page) pageHome();
