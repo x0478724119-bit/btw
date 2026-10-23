@@ -12,6 +12,15 @@ if (!SHOW_SAMPLES) {
 }
 const updating = s => s.planned > s.episodes.length ? '<span class="dot">·</span>更新中' : '';
 const themeOf = id => THEMES.find(t => t.id === id);
+// 连续剧封面在深色模式下的底色：保留每个学科原来的色相，调成深一点、浓一点的颜色
+function darkTint(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = Math.round(h * 60 + 360) % 360;
+  return `hsl(${h}, 22%, 19%)`;
+}
 const levelText = l => `${LEVELS[l].name} ${LEVELS[l].cefr}`;
 
 // ---------- 小组件 ----------
@@ -43,7 +52,7 @@ function seriesCard(s) {
   const t = themeOf(s.theme), p = seriesProgress(s);
   return `
     <a class="s-card" href="#/s/${s.id}">
-      <div class="s-cover" style="background:${t.tint}">
+      <div class="s-cover" style="--tint:${t.tint};--tint-dark:${darkTint(t.tint)}">
         ${favBtn('s:' + s.id)}
         <span class="kicker">${t.en}</span>
         <span class="en">${esc(s.en)}</span>
@@ -206,7 +215,7 @@ function pageSeries(id) {
   app.innerHTML = `
     <a class="back" href="#/series">← 连续剧</a>
     <div class="series-top">
-      <div class="s-cover" style="background:${t.tint}"><span class="kicker">${t.en}</span><span class="en">${esc(s.en)}</span></div>
+      <div class="s-cover" style="--tint:${t.tint};--tint-dark:${darkTint(t.tint)}"><span class="kicker">${t.en}</span><span class="en">${esc(s.en)}</span></div>
       <div>
         <div class="kicker">${t.name} · 连续剧</div>
         <h1 style="margin-top:8px">${esc(s.title)} ${favBtn('s:' + s.id).replace('fav-btn', 'fav-btn inline')}</h1>

@@ -30,12 +30,15 @@ html[data-theme="dark"] {
   --on-text: #141517;
   color-scheme: dark;
 }
-html[data-theme="dark"] .s-cover { background: var(--surface) !important; border: 1px solid var(--line); color: var(--text); }
+html[data-theme="dark"] .s-cover { background: var(--tint-dark, var(--surface)); color: var(--text); }
 html[data-theme="dark"] .s-cover .kicker { color: var(--muted); }
 html[data-theme="dark"] .notice.bad { background: rgba(180, 68, 46, .15); color: #E6A898; }
 html[data-theme="dark"] .fav-btn { background: rgba(28, 29, 32, .7); }
 html[data-theme="dark"] .a-card.has-thumb .fav-btn { background: rgba(28, 29, 32, .85); }
-html[data-theme="dark"] .a-thumb img, html[data-theme="dark"] .r-fig img { filter: brightness(.9); }
+/* 深色模式下照片太艳会像广告：卡片缩略图降低饱和度、压暗，鼠标停上去再恢复；文章里的图稍微压暗 */
+html[data-theme="dark"] .a-thumb img { filter: grayscale(.55) brightness(.72) contrast(.95); transition: filter .25s ease; }
+html[data-theme="dark"] .a-card:hover .a-thumb img { filter: grayscale(0) brightness(.9); }
+html[data-theme="dark"] .r-fig img { filter: brightness(.85) saturate(.85); }
 .theme-btn { border: 1px solid var(--line); background: var(--surface); color: var(--text-2); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; margin-left: auto; }
 .theme-btn + .nav-login { margin-left: -20px; }
 .theme-btn:hover { border-color: var(--text); color: var(--text); }
@@ -166,6 +169,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 8px 24px 96px; }
   aspect-ratio: 4 / 3; border-radius: var(--radius); padding: 20px;
   display: flex; flex-direction: column; justify-content: space-between;
   color: #2a2a28; transition: transform .2s ease;
+  background: var(--tint, var(--surface));
 }
 .s-card:hover .s-cover { transform: translateY(-2px); }
 .s-cover .en { font-size: 22px; line-height: 1.2; font-weight: 600; }
