@@ -25,6 +25,8 @@ const Cloud = (() => {
   let pushTimer = null, syncing = false;
   async function pull() {
     if (!user) return;
+    // 记下这个账号在这台设备（浏览器）上登录过，后台用来发现「同一台设备注册了很多账号」
+    if (visitor) sb.from('user_devices').upsert({ user_id: user.id, visitor, last_seen: new Date().toISOString() }, { onConflict: 'user_id,visitor' }).then(() => {}, () => {});
     syncing = true;
     try {
       const { data, error } = await sb.from('user_data').select('data').eq('user_id', user.id).maybeSingle();
@@ -127,6 +129,17 @@ const Cloud = (() => {
       if (!sb || !user) return false;
       const { data, error } = await sb.rpc('is_admin');
       return !error && data === true;
+    },
+
+    // 后台：所有账号（不是管理员会报错）
+    async adminUsers() {
+      const { data, error } = await sb.rpc('admin_users');
+      if (error) throw error;
+      return data || [];
+    },
+    async adminDeleteUser(id) {
+      const { error } = await sb.rpc('admin_delete_user', { target: id });
+      if (error) throw new Error(/cannot delete an admin/.test(error.message) ? '不能删除管理员账号。' : '没删成功：' + error.message);
     },
 
     // 后台：不是管理员会报错

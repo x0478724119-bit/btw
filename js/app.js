@@ -312,6 +312,7 @@ async function pageAdmin() {
       <div class="stat-box"><b>${d.users_7d}</b><span>这 7 天新注册</span></div>
       <div class="stat-box"><b>${d.visitors_7d}</b><span>这 7 天来读的人</span></div>
     </div>
+    <section class="section" id="admin-users"><div class="section-head"><h2>账号</h2><span class="meta">正在读取……</span></div></section>
     <section class="section"><div class="section-head"><h2>按合集</h2><span class="meta">读过的人数</span></div>
       ${Object.keys(bySeries).length ? `<div class="list">${Object.entries(bySeries).sort((a, b) => b[1] - a[1]).map(([k, v]) => `
         <div class="list-item"><div class="grow"><h3>${esc(k)}</h3></div><b>${v}</b></div>`).join('')}</div>` : '<div class="empty">还没有数据。</div>'}
@@ -326,6 +327,7 @@ async function pageAdmin() {
         <div class="list-item fb-item"><div class="grow"><div class="meta">${fmt(f.created_at)} · ${esc(f.article_id ? titleOf(f.article_id) : '整站')}${f.contact ? ' · 联系方式：' + esc(f.contact) : ''}</div>
         <p>${esc(f.message)}</p></div></div>`).join('')}</div>` : '<div class="empty">还没有留言。</div>'}
     </section>`;
+  drawAdminUsers();
 }
 
 // ---------- 我的 ----------
@@ -399,7 +401,7 @@ function pageMe() {
       <input id="fb-contact" maxlength="200" placeholder="留个联系方式（可以不填）">
       <button class="btn btn-ghost" id="fb-send">发送</button><span class="meta" id="fb-note"></span></div>
     </section>
-    <p class="meta credits">我们会匿名记录哪篇文章被打开、被读完，用来决定接下来写什么；不会记录你是谁。<br>点词释义来自开源词典 <a href="https://github.com/skywind3000/ECDICT" target="_blank" rel="noopener">ECDICT</a>（<a href="licenses/ECDICT-LICENSE.txt" target="_blank">MIT 授权</a>）。文章原文出处见每篇文末。</p>`;
+    <p class="meta credits">我们会匿名记录哪篇文章被打开、被读完，用来决定接下来写什么；登录后，会记下这台浏览器的一个随机编号，用来防止有人批量注册。不会记录你的真实身份。<br>点词释义来自开源词典 <a href="https://github.com/skywind3000/ECDICT" target="_blank" rel="noopener">ECDICT</a>（<a href="licenses/ECDICT-LICENSE.txt" target="_blank">MIT 授权</a>）。文章原文出处见每篇文末。</p>`;
 
   const so = document.getElementById('sign-out');
   if (so) so.onclick = async e => { e.preventDefault(); await Cloud.signOut(); pageMe(); };
@@ -422,6 +424,32 @@ function pageMe() {
 
 function pageNotFound() {
   app.innerHTML = '<div class="page-head"><h1>找不到这一页</h1><p><a href="#/" style="color:var(--accent)">回首页 →</a></p></div>';
+}
+
+// 后台里的「账号」：所有注册的人，同一台设备上有好几个账号的会标出来，可以删除（管理员删不掉）
+async function drawAdminUsers() {
+  const box = document.getElementById('admin-users');
+  if (!box) return;
+  let users;
+  try { users = await Cloud.adminUsers(); }
+  catch (e) { box.innerHTML = '<div class="section-head"><h2>账号</h2></div><div class="empty">账号列表还没开通：要先在 Supabase 里跑一次 tools/supabase-accounts.sql。</div>'; return; }
+  // 每台设备上有几个账号
+  const perDevice = {};
+  users.forEach(u => u.devices.forEach(v => { perDevice[v] = (perDevice[v] || 0) + 1; }));
+  const shared = u => Math.max(0, ...u.devices.map(v => perDevice[v] - 1));
+  const day = t => t ? new Date(t).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) : '—';
+  box.innerHTML = `<div class="section-head"><h2>账号</h2><span class="meta">${users.length} 个 · 标红的是同一台设备上还有别的账号</span></div>
+    ${users.length ? `<div class="list">${users.map(u => `
+      <div class="list-item"><div class="grow"><h3>${esc(u.email || '（没有邮箱）')}${u.is_admin ? ' <span class="meta">· 管理员</span>' : ''}</h3>
+        <div class="meta">注册 ${day(u.created_at)} · 最后登录 ${day(u.last_sign_in_at)}${u.email_confirmed_at ? '' : ' · 邮箱没确认'}${shared(u) ? ` · <span class="warn">这台设备上还有 ${shared(u)} 个账号</span>` : ''}</div></div>
+        ${u.is_admin ? '' : `<button class="btn btn-ghost btn-sm" data-del-user="${esc(u.id)}" data-email="${esc(u.email || '')}">删除</button>`}</div>`).join('')}</div>`
+      : '<div class="empty">还没有人注册。</div>'}`;
+  box.querySelectorAll('[data-del-user]').forEach(b => b.onclick = async () => {
+    if (!confirm(`确定删除 ${b.dataset.email} 吗？这个人的阅读进度、收藏、生词会一起删掉，删了找不回来。`)) return;
+    b.disabled = true;
+    try { await Cloud.adminDeleteUser(b.dataset.delUser); drawAdminUsers(); }
+    catch (e) { alert(e.message); b.disabled = false; }
+  });
 }
 
 // 「你想看什么」：单独一页，首页顶部有入口

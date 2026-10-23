@@ -435,6 +435,8 @@ body.reading { background: var(--r-bg, #fff); }
 .r-fb summary { cursor: pointer; color: var(--r-muted); font-size: 13px; list-style: none; }
 .r-fb summary::-webkit-details-marker { display: none; }
 .r-fb .fb-form { margin-top: 12px; }
+.warn { color: #B4442E; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
 .fb-item p { margin: 6px 0 0; white-space: pre-wrap; }
 .auth .links { display: flex; justify-content: space-between; margin-top: 18px; font-size: 13px; color: var(--muted); }
 
