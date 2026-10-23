@@ -356,14 +356,15 @@ function pageMe() {
   }).filter(Boolean);
   app.innerHTML = `
     <div class="me-top">
-      <div class="avatar">我</div>
+      <button class="avatar-btn" id="edit-profile" title="改头像和昵称">${avatarHTML(d.profile)}</button>
       <div>
-        ${Cloud.user() ? `<h1>${esc(Cloud.user().email)}</h1>
-        <div class="meta">进度、收藏和生词会自动同步到云端 · <a href="#/me" id="sign-out" style="color:var(--accent)">退出登录</a><span id="admin-link"></span></div>`
-        : `<h1>未登录</h1>
+        ${Cloud.user() ? `<h1>${esc(d.profile && d.profile.name || Cloud.user().email)}</h1>
+        <div class="meta">${d.profile && d.profile.name ? esc(Cloud.user().email) + ' · ' : ''}进度、收藏和生词会自动同步到云端 · <a href="#/me" id="sign-out" style="color:var(--accent)">退出登录</a><span id="admin-link"></span></div>`
+        : `<h1>${esc(d.profile && d.profile.name || '未登录')}</h1>
         <div class="meta">进度保存在这台设备的浏览器里 · <a href="#/login" style="color:var(--accent)">登录 / 注册</a>，换设备也能接着读</div>`}
       </div>
     </div>
+    <div id="profile-edit"></div>
     <div class="stats">
       <div class="stat-box"><b>${Math.round(Store.totalSeconds() / 60)}</b><span>总阅读（分钟）</span></div>
       <div class="stat-box"><b>${done.length}</b><span>读完的文章</span></div>
@@ -403,6 +404,7 @@ function pageMe() {
     </section>
     <p class="meta credits">我们会匿名记录哪篇文章被打开、被读完，用来决定接下来写什么；登录后，会记下这台浏览器的一个随机编号，用来防止有人批量注册。不会记录你的真实身份。<br>点词释义来自开源词典 <a href="https://github.com/skywind3000/ECDICT" target="_blank" rel="noopener">ECDICT</a>（<a href="licenses/ECDICT-LICENSE.txt" target="_blank">MIT 授权</a>）。文章原文出处见每篇文末。</p>`;
 
+  document.getElementById('edit-profile').onclick = () => drawProfileEdit();
   const so = document.getElementById('sign-out');
   if (so) so.onclick = async e => { e.preventDefault(); await Cloud.signOut(); pageMe(); };
   Cloud.isAdmin().then(yes => { const x = document.getElementById('admin-link'); if (yes && x) x.innerHTML = ' · <a href="#/admin" style="color:var(--accent)">后台</a>'; });
@@ -450,6 +452,39 @@ async function drawAdminUsers() {
     try { await Cloud.adminDeleteUser(b.dataset.delUser); drawAdminUsers(); }
     catch (e) { alert(e.message); b.disabled = false; }
   });
+}
+
+// ---------- 头像和昵称 ----------
+// 头像不上传照片：从几种颜色里选一个（显示昵称的第一个字），或者选一个小图标
+const AVATAR_COLORS = ['#2F5D50', '#3E6A9E', '#8A5A9E', '#B4442E', '#B07D2B', '#4A7C59', '#C0687A', '#55534E'];
+const AVATAR_ICONS = ['🦋', '🐱', '🦊', '🐼', '🦉', '🐢', '🌿', '📚', '☕', '🌙', '🎧', '✏️'];
+function avatarHTML(p = {}) {
+  const color = AVATAR_COLORS[p.color || 0] || AVATAR_COLORS[0];
+  if (p.icon) return `<span class="avatar icon">${p.icon}</span>`;
+  const ch = (p.name || '我').trim().charAt(0) || '我';
+  return `<span class="avatar letter" style="background:${color}">${esc(ch.toUpperCase())}</span>`;
+}
+function drawProfileEdit() {
+  const box = document.getElementById('profile-edit');
+  if (!box) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }   // 再点一下头像就收起
+  const p = { ...Store.get().profile };
+  const draw = () => {
+    box.innerHTML = `<div class="profile-edit">
+      <label class="field"><span>昵称</span><input id="pe-name" maxlength="20" placeholder="比如：小周" value="${esc(p.name || '')}"></label>
+      <div class="pe-label">头像颜色（显示昵称的第一个字）</div>
+      <div class="pe-row">${AVATAR_COLORS.map((c, i) => `<button class="pe-color ${!p.icon && (p.color || 0) === i ? 'on' : ''}" data-color="${i}" style="background:${c}" title="选这个颜色"></button>`).join('')}</div>
+      <div class="pe-label">或者选一个小图标</div>
+      <div class="pe-row">${AVATAR_ICONS.map(ic => `<button class="pe-icon ${p.icon === ic ? 'on' : ''}" data-icon="${ic}">${ic}</button>`).join('')}</div>
+      <div class="pe-actions"><button class="btn btn-primary btn-sm" id="pe-save">保存</button><button class="btn btn-ghost btn-sm" id="pe-cancel">取消</button></div>
+    </div>`;
+    box.querySelector('#pe-name').oninput = e => { p.name = e.target.value; };
+    box.querySelectorAll('[data-color]').forEach(b => b.onclick = () => { p.color = Number(b.dataset.color); p.icon = ''; draw(); });
+    box.querySelectorAll('[data-icon]').forEach(b => b.onclick = () => { p.icon = b.dataset.icon; draw(); });
+    box.querySelector('#pe-save').onclick = () => { Store.setProfile({ name: (p.name || '').trim().slice(0, 20), icon: p.icon || '', color: p.color || 0 }); pageMe(); };
+    box.querySelector('#pe-cancel').onclick = () => { box.innerHTML = ''; };
+  };
+  draw();
 }
 
 // 「你想看什么」：单独一页，首页顶部有入口

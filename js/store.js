@@ -10,6 +10,7 @@ const Store = (() => {
     last: null,           // 上次在读的文章 id
     favs: [],             // 收藏：'s:连续剧id' 或 'a:文章id'，新的在前
     history: [],          // 足迹：最近打开过的文章 id，新的在前
+    profile: { name: '', icon: '', color: 0 },   // 昵称和头像（颜色序号 + 可选的小图标）
     settings: { size: 2, bg: 'white', rate: 0.9, hover: true, voice: '', hintSeen: false, mode: 'dg' },
   });
 
@@ -46,6 +47,9 @@ const Store = (() => {
     out.history = uniq([...(a.history || []), ...(b.history || [])], x => x).slice(0, 100);
     out.words = uniq([...(a.words || []), ...(b.words || [])], x => x.w + '|' + x.article);
     out.last = a.last || b.last;
+    // 昵称和头像：这台设备上设过就用这台的，没设过就用云端的（换新设备登录时不会被空白覆盖）
+    const set = p => p && (p.name || p.icon || p.color);
+    out.profile = set(a.profile) ? a.profile : (b.profile || a.profile || blank().profile);
     return out;
   }
 
@@ -57,6 +61,7 @@ const Store = (() => {
     save,
     setLevel(l) { data.level = l; save(); },
     setSetting(k, v) { data.settings[k] = v; save(); },
+    setProfile(p) { data.profile = { ...data.profile, ...p }; save(); },
 
     addSeconds(id, s) {
       prog(id).seconds += s;
